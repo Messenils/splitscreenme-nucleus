@@ -39,6 +39,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
             public uint RemoveBorderHookID = (uint)ProtoHookIDs.RemoveBorderHookID;
             public uint GetCursorInfoID = (uint)ProtoHookIDs.RemoveBorderHookID;
             public uint SetWindowsHookHookID = (uint)ProtoHookIDs.SetWindowsHookHookID;
+            public uint GetRawInputBufferHookID = (uint)ProtoHookIDs.GetRawInputBufferHookID;
 
             public uint RawInputFilterID = (uint)ProtoMessageFilterIDs.RawInputFilterID;
             public uint MouseMoveFilterID = (uint)ProtoMessageFilterIDs.MouseMoveFilterID;
@@ -77,7 +78,8 @@ namespace Nucleus.Gaming.Coop.ProtoInput
             AdjustWindowRectHookID,
             RemoveBorderHookID,
             GetCursorInfoID,
-            SetWindowsHookHookID
+            SetWindowsHookHookID,
+            GetRawInputBufferHookID
         };
 
         public enum ProtoMessageFilterIDs : uint

@@ -78,6 +78,7 @@ namespace Nucleus.Gaming.Coop.ProtoInput
         public bool SetWindowStyleHook;
         public bool GetCursorInfoHook;
         public bool SetWindowsHookHook;
+        public bool GetRawInputBufferHook;
         public MoveWindowHook MoveWindowHook;
         public bool AdjustWindowRectHook;
         public SetRemoveBorderHook SetRemoveBorderHook;

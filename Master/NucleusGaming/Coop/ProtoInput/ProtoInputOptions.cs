@@ -85,6 +85,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
         public int ScaleFromX;
         public int ScaleFromY;
 
+        public bool RemoveBorders;
+        public bool SetPosition;
+
         public bool RawInputFilter;
         public bool MouseMoveFilter;
         public bool MouseActivateFilter;

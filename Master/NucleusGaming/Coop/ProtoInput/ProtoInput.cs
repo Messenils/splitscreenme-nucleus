@@ -203,6 +203,9 @@ namespace Nucleus.Gaming.Coop.ProtoInput
             [DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
             public static extern void SetDontWaitWindowBorder(uint instanceHandle, bool enable);
 
+            [DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+            public static extern void SetWindowSetup(uint instanceHandle, bool borders, bool position);
+
             // Both of these functions require RenameHandlesHookHookID hook
             [DllImport("ProtoInputLoader32.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
             public static extern void AddHandleToRename(uint instanceHandle, string name);
@@ -456,7 +459,10 @@ namespace Nucleus.Gaming.Coop.ProtoInput
 
             // This MUST be called before calling InstallHook on the RemoveBorderhook
             [DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern void SetDontWaitWindowBorder(uint instanceHandle, bool enable);
+            public static extern void SetDontWaitWindowBorder(uint instanceHandle, bool enable); //   public static extern void SetWindowSetup(uint instanceHandle, bool borders, bool position);
+
+            [DllImport("ProtoInputLoader64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+            public static extern void SetWindowSetup(uint instanceHandle, bool borders, bool position);
 
             [DllImport("ProtoInputUtilDynamic64.dll", CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
             public static extern uint LockInput(bool lockInput);
@@ -965,8 +971,19 @@ namespace Nucleus.Gaming.Coop.ProtoInput
             {
                 ProtoInput64.SetDontWaitWindowBorder(instanceHandle, enable);
             }
-        }
+        } //SetWindowSetup(uint instanceHandle, bool borders, bool position);
 
+        public void SetWindowSetup(uint instanceHandle, bool borders, bool position)
+        {
+            if (IntPtr.Size == 4)
+            {
+                ProtoInput32.SetWindowSetup(instanceHandle, borders, position);
+            }
+            else
+            {
+                ProtoInput64.SetWindowSetup(instanceHandle, borders, position);
+            }
+        } //SetWindowSetup(uint instanceHandle, bool borders, bool position);
         /// <summary>
         /// Require RenameHandlesHookHookID hook
         /// </summary>

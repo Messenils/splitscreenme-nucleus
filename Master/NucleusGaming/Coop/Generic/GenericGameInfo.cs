@@ -272,7 +272,7 @@ namespace Nucleus.Gaming
         public int PauseCMDBatchBefore;
         public int PauseCMDBatchAfter;
         public bool DontRemoveBorders;
-        public bool RePickProcessOnExit;
+        public bool ForceProcessPickerOnGameExit;
         public string[] KillMutexProcess;
         public string MutexProcessExe;
         public bool PartialMutexSearchProcess;

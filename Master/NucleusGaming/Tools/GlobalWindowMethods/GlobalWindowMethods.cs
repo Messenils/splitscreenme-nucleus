@@ -1197,7 +1197,7 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                 {
                     if (data.Process.HasExited)
                     {
-                        if (handlerInstance.CurrentGameInfo.RePickProcessOnExit) //also line 1252
+                        if (handlerInstance.CurrentGameInfo.ForceProcessPickerOnGameExit) //also line 1252
                         {
                             GenericGameHandler.Instance.Log("(Update) Lost process, spawning process picker");
                             Globals.MainOSD.Show(2000, "Lost Process...");
@@ -1251,7 +1251,7 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                          {
                             if (data.Process.HasExited)
                             {
-                                if (handlerInstance.CurrentGameInfo.RePickProcessOnExit) //also line 1200
+                                if (handlerInstance.CurrentGameInfo.ForceProcessPickerOnGameExit) //also line 1200
                                 {
                                     GenericGameHandler.Instance.Log("(Update) Lost process, spawning process picker");
                                     Globals.MainOSD.Show(2000, "Lost Process...");

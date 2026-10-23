@@ -1128,7 +1128,7 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
             }
         }
         #endregion
-        
+
         private static void RestartInstanceThread(PlayerInfo p, List<PlayerInfo> players, Process quitproc)
         {
             var handlerInstance = GenericGameHandler.Instance;
@@ -1165,7 +1165,7 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                     p.ProcessData.AssignProcess(Coop.Generic.ProcessPickerRuntime.LaunchProcessPick(p));
                 }
                 handlerInstance.ReHook(p);
-                
+
                 Thread.Sleep(1000);
                 ChangeGameWindow(p.ProcessData.Process, handlerInstance.profile.DevicesList, p.PlayerID);
                 if (relock)
@@ -1186,14 +1186,25 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
 
                 if (p.PlayerID + 1 != players.Count && !handlerInstance.CurrentGameInfo.KillLastInstanceMutex) //lastinstance mutex may be blocking
                 {
-                    handlerInstance.MutexKill();
+                    if (!handlerInstance.MutexKill())
+                    {
+                        handlerInstance.Log("Relaunch aborted before mutexkill");
+                        handlerInstance.exited++;
+                        return; //exit
+                    }
                     handlerInstance.Log("Relaunch killed mutex on previous instance");
                     Thread.Sleep(1000);
                 }
-                handlerInstance.LaunchGame(p, p.PlayerID, true);
+                if (!handlerInstance.LaunchGame(p, p.PlayerID, true))
+                {
+                    handlerInstance.Log("Relaunch aborted before launch");
+                    handlerInstance.exited++;
+                    return; //exit
+                }
+
                 handlerInstance.Log("Relaunch started game");
                 Thread.Sleep(1000);
-                
+
                 handlerInstance.Log("Relaunch Process Search");
                 p.ProcessData.AssignProcess(handlerInstance.processsearch(p, p.PlayerID, true));
                 if (p.ProcessData != null)
@@ -1201,7 +1212,12 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                     handlerInstance.processorpriority(p, p.PlayerID);
                     handlerInstance.Log("Relaunch ProcessorPriority set");
                     Thread.Sleep(1000);
-                    handlerInstance.hookinstance(p, p.PlayerID);
+                    if (!handlerInstance.hookinstance(p, p.PlayerID))
+                    {
+                        handlerInstance.Log("Relaunch aborted before hooking");
+                        handlerInstance.exited++;
+                        return; //exit
+                    }
                     handlerInstance.Log("Relaunch Hooked Instance");
                     Thread.Sleep(1000);
                     handlerInstance.MutexKill();
@@ -1216,114 +1232,7 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                 }
                 if (relock)
                     LockInputRuntime.Lock(handlerInstance.CurrentGameInfo.LockInputSuspendsExplorer, handlerInstance.CurrentGameInfo.ProtoInput.FreezeExternalInputWhenInputNotLocked, handlerInstance.CurrentGameInfo?.ProtoInput);
-
-        private static void RestartInstanceThread(PlayerInfo p, List<PlayerInfo> players, Process quitproc)
-        {
-            var handlerInstance = GenericGameHandler.Instance;
-
-            if (handlerInstance.attached.Contains(quitproc))
-            {
-                handlerInstance.attached.Remove(quitproc);
             }
-
-            if (handlerInstance.attachedIds.Contains(quitproc.Id))
-            {
-                handlerInstance.attachedIds.Remove(quitproc.Id);
-            }
-
-            //reset
-            p.ProcessData.HWnd = null;
-            p.ProcessData.Setted = false;
-            p.ProcessData.Status = 0;
-            p.ProcessData.Finished = false;
-
-            if (handlerInstance.CurrentGameInfo.GameReLaunchByItself) //Battlefield 1942 and Vietnam restarts process each map load
-            {
-                Thread.Sleep(1000);
-                bool relock = LockInputRuntime.IsLocked;
-
-                if (relock)
-                {
-                    LockInputRuntime.Unlock(GenericGameHandler.Instance.CurrentGameInfo?.ProtoInput.FreezeExternalInputWhenInputNotLocked ?? true, GenericGameHandler.Instance.CurrentGameInfo?.ProtoInput);
-                }
-
-                handlerInstance.Log("(Update) Lost process, no launch, just search and rehook");
-                Globals.MainOSD.Show(1000, "Lost Process...Searching");
-
-                Thread.Sleep(handlerInstance.CurrentGameInfo.PauseBetweenProcessGrab * 1000);
-                p.ProcessData.AssignProcess(handlerInstance.ReHookProcessSearch(p));
-
-                if (p.ProcessData == null)
-                {
-                    p.ProcessData.AssignProcess(Coop.Generic.ProcessPickerRuntime.LaunchProcessPick(p));
-                }
-
-                handlerInstance.ReHook(p);
-
-                Thread.Sleep(1000);
-
-                ChangeGameWindow(p.ProcessData.Process, handlerInstance.profile.DevicesList, p.PlayerID);
-
-                if (relock)
-                    LockInputRuntime.Lock(handlerInstance.CurrentGameInfo.LockInputSuspendsExplorer, handlerInstance.CurrentGameInfo.ProtoInput.FreezeExternalInputWhenInputNotLocked, handlerInstance.CurrentGameInfo?.ProtoInput);
-                Globals.MainOSD.Show(1000, "Instance hooked again");
-            }
-            else if (!handlerInstance.CurrentGameInfo.CantRestartInstances)
-            {
-                handlerInstance.Log("Process Lost... Attempting Restart");
-                Thread.Sleep(1000);
-
-                bool relock = LockInputRuntime.IsLocked;
-
-                if (relock)
-                {
-                    LockInputRuntime.Unlock(handlerInstance.CurrentGameInfo?.ProtoInput.FreezeExternalInputWhenInputNotLocked ?? true, handlerInstance.CurrentGameInfo?.ProtoInput);
-                }
-
-                Globals.MainOSD.Show(1000, "Lost Process... Attempting Restart");
-
-                if (p.PlayerID + 1 != players.Count && !handlerInstance.CurrentGameInfo.KillLastInstanceMutex) //lastinstance mutex may be blocking
-                {
-                    handlerInstance.MutexKill();
-                    handlerInstance.Log("Relaunch killed mutex on previous instance");
-                    Thread.Sleep(1000);
-                }
-
-                handlerInstance.LaunchGame(p, p.PlayerID, true);
-                handlerInstance.Log("Relaunch started game");
-
-                Thread.Sleep(1000);
-
-                handlerInstance.Log("Relaunch Process Search");
-                p.ProcessData.AssignProcess(handlerInstance.processsearch(p, p.PlayerID, true));
-
-                if (p.ProcessData != null)
-                {
-                    handlerInstance.processorpriority(p, p.PlayerID);
-                    handlerInstance.Log("Relaunch ProcessorPriority set");
-                    Thread.Sleep(1000);
-                    handlerInstance.hookinstance(p, p.PlayerID);
-                    handlerInstance.Log("Relaunch Hooked Instance");
-                    Thread.Sleep(1000);
-                    handlerInstance.MutexKill();
-                    handlerInstance.Log("Relaunch killed mutex");
-                    ChangeGameWindow(p.ProcessData.Process, handlerInstance.profile.DevicesList, p.PlayerID);
-                }
-                else
-                {
-                    handlerInstance.Log("Error: Relaunch Failed to find new process.");
-                    handlerInstance.exited++;
-                    Globals.MainOSD.Show(4000, "Failed to launch process");
-                }
-
-                if (relock)
-                    LockInputRuntime.Lock(handlerInstance.CurrentGameInfo.LockInputSuspendsExplorer, handlerInstance.CurrentGameInfo.ProtoInput.FreezeExternalInputWhenInputNotLocked, handlerInstance.CurrentGameInfo?.ProtoInput);
-
-            }
-
-            RestartThreadIsRunning = false;
-
-            return;
         }
 
         private static Thread RestartThread;

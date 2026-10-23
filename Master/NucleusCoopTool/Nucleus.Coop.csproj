@@ -102,6 +102,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|Win32'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'TestDebug|Win32'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -430,7 +431,6 @@
     <Compile Include="UI\UI_Graphics.cs" />
     <Compile Include="UI\UI_Interface.cs" />
     <Compile Include="UI\GameOptionMenuFunc.cs" />
-    <Compile Include="UI\UI_Nav_V2\UI_Nav_Supervisor.cs" />
     <EmbeddedResource Include="Controls\DragAndDropModal.resx">
       <DependentUpon>DragAndDropModal.cs</DependentUpon>
     </EmbeddedResource>
@@ -1007,7 +1007,9 @@
     <None Include="Resources\extract_nc.png" />
     <Content Include="Resources\icon.ico" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="UI\UI_Nav_V2\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>echo.&gt;Built.flag

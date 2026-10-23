@@ -19,7 +19,7 @@ using Nucleus.Gaming.Http_Client;
 using Nucleus.Gaming.Forms;
 using Nucleus.Gaming.Windows;
 using System.Runtime.InteropServices;
-using Nucleus.Coop.UI.UI_Nav_V2;
+//using Nucleus.Coop.UI.UI_Nav_V2; 
 using Gamepads;
 
 namespace Nucleus.Coop

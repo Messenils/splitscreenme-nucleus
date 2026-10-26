@@ -1548,6 +1548,7 @@ namespace Nucleus.Gaming
 
         public string Play()
         {
+            IsRunning = true;
             GlobalWindowMethods.RestartThreadIsRunning = true; //block remote calls
             if (!App_Misc.IgnoreInputLockReminder)
             {
@@ -1729,7 +1730,7 @@ namespace Nucleus.Gaming
                     return string.Empty;
                 }
 
-                IsRunning = true;
+                
                 Log($"********** Setting up player {i + 1} **********" + "\n");
 
                 PlayerInfo player = players[i];

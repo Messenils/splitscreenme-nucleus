@@ -1147,10 +1147,15 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
             p.ProcessData.Setted = false;
             p.ProcessData.Status = 0;
             p.ProcessData.Finished = false;
+            p.ProcessData.KilledMutexes = false;
 
             if (handlerInstance.CurrentGameInfo.GameReLaunchByItself) //Battlefield 1942 and Vietnam restarts process each map load
             {
                 Thread.Sleep(1000);
+
+                if (GenericGameHandler.Instance.processingExit)
+                    return;
+
                 bool relock = LockInputRuntime.IsLocked;
                 if (relock)
                 {
@@ -1159,15 +1164,27 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                 handlerInstance.Log("(Update) Lost process, no launch, just search and rehook");
                 Globals.MainOSD.Show(1000, "Lost Process...Searching");
                 Thread.Sleep(handlerInstance.CurrentGameInfo.PauseBetweenProcessGrab * 1000);
+
                 p.ProcessData.AssignProcess(handlerInstance.ReHookProcessSearch(p));
                 if (p.ProcessData == null)
                 {
                     p.ProcessData.AssignProcess(Coop.Generic.ProcessPickerRuntime.LaunchProcessPick(p));
                 }
-                handlerInstance.ReHook(p);
+                if (p.ProcessData != null)
+                    handlerInstance.ReHook(p);
+                else
+                {
+                    handlerInstance.Log("(Update) Rehook failed to find process");
+                    return;
+                }
 
                 Thread.Sleep(1000);
+
+                if (GenericGameHandler.Instance.processingExit)
+                    return;
+
                 ChangeGameWindow(p.ProcessData.Process, handlerInstance.profile.DevicesList, p.PlayerID);
+
                 if (relock)
                     LockInputRuntime.Lock(handlerInstance.CurrentGameInfo.LockInputSuspendsExplorer, handlerInstance.CurrentGameInfo.ProtoInput.FreezeExternalInputWhenInputNotLocked, handlerInstance.CurrentGameInfo?.ProtoInput);
                 Globals.MainOSD.Show(1000, "Instance hooked again");
@@ -1176,6 +1193,9 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
             {
                 handlerInstance.Log("Process Lost... Attempting Restart");
                 Thread.Sleep(1000);
+
+                if (GenericGameHandler.Instance.processingExit)
+                    return;
 
                 bool relock = LockInputRuntime.IsLocked;
                 if (relock)
@@ -1186,15 +1206,14 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
 
                 if (p.PlayerID + 1 != players.Count && !handlerInstance.CurrentGameInfo.KillLastInstanceMutex) //lastinstance mutex may be blocking
                 {
-                    if (!handlerInstance.MutexKill())
-                    {
-                        handlerInstance.Log("Relaunch aborted before mutexkill");
-                        handlerInstance.exited++;
-                        return; //exit
-                    }
+                    handlerInstance.MutexKill();
                     handlerInstance.Log("Relaunch killed mutex on previous instance");
                     Thread.Sleep(1000);
                 }
+
+                if (GenericGameHandler.Instance.processingExit)
+                    return;
+
                 if (!handlerInstance.LaunchGame(p, p.PlayerID, true))
                 {
                     handlerInstance.Log("Relaunch aborted before launch");
@@ -1205,6 +1224,9 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                 handlerInstance.Log("Relaunch started game");
                 Thread.Sleep(1000);
 
+                if (GenericGameHandler.Instance.processingExit)
+                    return;
+
                 handlerInstance.Log("Relaunch Process Search");
                 p.ProcessData.AssignProcess(handlerInstance.processsearch(p, p.PlayerID, true));
                 if (p.ProcessData != null)
@@ -1212,6 +1234,10 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                     handlerInstance.processorpriority(p, p.PlayerID);
                     handlerInstance.Log("Relaunch ProcessorPriority set");
                     Thread.Sleep(1000);
+
+                    if (GenericGameHandler.Instance.processingExit)
+                        return;
+
                     if (!handlerInstance.hookinstance(p, p.PlayerID))
                     {
                         handlerInstance.Log("Relaunch aborted before hooking");
@@ -1220,6 +1246,10 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                     }
                     handlerInstance.Log("Relaunch Hooked Instance");
                     Thread.Sleep(1000);
+
+                    if (GenericGameHandler.Instance.processingExit)
+                        return;
+
                     handlerInstance.MutexKill();
                     handlerInstance.Log("Relaunch killed mutex");
                     ChangeGameWindow(p.ProcessData.Process, handlerInstance.profile.DevicesList, p.PlayerID);
@@ -1228,11 +1258,11 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                 {
                     handlerInstance.Log("Error: Relaunch Failed to find new process.");
                     handlerInstance.exited++;
-                    Globals.MainOSD.Show(4000, "Failed to launch process");
                 }
                 if (relock)
                     LockInputRuntime.Lock(handlerInstance.CurrentGameInfo.LockInputSuspendsExplorer, handlerInstance.CurrentGameInfo.ProtoInput.FreezeExternalInputWhenInputNotLocked, handlerInstance.CurrentGameInfo?.ProtoInput);
             }
+            RestartThreadIsRunning = false;
         }
 
         private static Thread RestartThread;
@@ -1729,7 +1759,15 @@ namespace Nucleus.Gaming.Tools.GlobalWindowMethods
                                     else
                                     {
                                         data.Setted = true;
-                                    }
+
+                                        //untested idea. what game to test this on?
+                                       // if (GenericGameHandler.Instance.CurrentGameInfo.ForwardWindowToProtoInput && GenericGameHandler.Instance.CurrentGameInfo.ProtoInput.InjectStartup) //untested. only on startup as may not be injected yet
+                                       // {
+                                       //     ProtoInput.protoInput.UpdateMainWindowHandle(
+                                       //     (uint)p.PlayerID + 1, (ulong)data.HWnd.NativePtr
+                                       //     );
+                                      //  }
+                                    } 
 
                                     if (handlerInstance.CurrentGameInfo.IdInWindowTitle)
                                     {
